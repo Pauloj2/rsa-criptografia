@@ -1,76 +1,76 @@
-# 🔐 RSA Cryptography — Implementação Manual em Python
+# 🔐 RSA Cryptography — Manual Implementation in Python
 
-Implementação completa do algoritmo **RSA (Rivest-Shamir-Adleman)** feita do zero em Python puro, sem uso de bibliotecas de criptografia externas. O projeto cobre desde a geração de números primos grandes até a cifragem e decifragem de mensagens UTF-8.
-
----
-
-## 📋 Índice
-
-- [Sobre o Projeto](#sobre-o-projeto)
-- [Fundamentos Matemáticos](#fundamentos-matemáticos)
-- [Estrutura do Código](#estrutura-do-código)
-- [Como Usar](#como-usar)
-- [Exemplo de Saída](#exemplo-de-saída)
-- [Limitações e Segurança](#limitações-e-segurança)
-- [Requisitos](#requisitos)
+Complete implementation of the **RSA (Rivest-Shamir-Adleman)** algorithm built from scratch in pure Python, without any external cryptography libraries. The project covers everything from large prime number generation to UTF-8 message encryption and decryption.
 
 ---
 
-## Sobre o Projeto
+## 📋 Table of Contents
 
-RSA é um dos algoritmos de criptografia assimétrica mais utilizados no mundo. Ele funciona com um **par de chaves**:
+- [About the Project](#about-the-project)
+- [Mathematical Foundations](#mathematical-foundations)
+- [Code Structure](#code-structure)
+- [How to Use](#how-to-use)
+- [Sample Output](#sample-output)
+- [Limitations and Security](#limitations-and-security)
+- [Requirements](#requirements)
 
-- **Chave pública** `(e, n)` — usada para **cifrar** a mensagem. Pode ser compartilhada livremente.
-- **Chave privada** `(d, n)` — usada para **decifrar** a mensagem. Deve ser mantida em segredo.
+---
 
-A segurança do RSA baseia-se na dificuldade computacional de **fatorar números inteiros muito grandes** — um problema para o qual não se conhece solução eficiente em computadores clássicos.
+## About the Project
+
+RSA is one of the most widely used asymmetric encryption algorithms in the world. It works with a **key pair**:
+
+- **Public key** `(e, n)` — used to **encrypt** the message. Can be shared freely.
+- **Private key** `(d, n)` — used to **decrypt** the message. Must be kept secret.
+
+The security of RSA relies on the computational difficulty of **factoring very large integers** — a problem for which no efficient solution is known on classical computers.
 
 ---
 
 <img width="1159" height="891" alt="image" src="https://github.com/user-attachments/assets/ea3ecca2-dab6-46ea-b223-5aa9295056dc" />
 
 
-## Fundamentos Matemáticos
+## Mathematical Foundations
 
-### 1. Geração das Chaves
+### 1. Key Generation
 
-O processo de geração de chaves segue os seguintes passos:
+The key generation process follows these steps:
 
-| Passo | Operação | Descrição |
-|-------|----------|-----------|
-| 1 | Escolher `p` e `q` | Dois números primos grandes e distintos |
-| 2 | Calcular `n = p × q` | Módulo RSA (parte pública) |
-| 3 | Calcular `φ(n) = (p-1)(q-1)` | Função Totiente de Euler |
-| 4 | Escolher `e` | Inteiro tal que `1 < e < φ(n)` e `mdc(e, φ(n)) = 1` |
-| 5 | Calcular `d = e⁻¹ mod φ(n)` | Expoente de decifragem (via Euclides Estendido) |
+| Step | Operation | Description |
+|------|-----------|-------------|
+| 1 | Choose `p` and `q` | Two large, distinct prime numbers |
+| 2 | Compute `n = p × q` | RSA modulus (public component) |
+| 3 | Compute `φ(n) = (p-1)(q-1)` | Euler's Totient Function |
+| 4 | Choose `e` | Integer such that `1 < e < φ(n)` and `gcd(e, φ(n)) = 1` |
+| 5 | Compute `d = e⁻¹ mod φ(n)` | Decryption exponent (via Extended Euclidean Algorithm) |
 
-O valor `e = 65537` (primo de Fermat, `2¹⁶ + 1`) é usado por padrão — é uma escolha amplamente adotada na prática por ser eficiente e seguro.
+The value `e = 65537` (Fermat prime, `2¹⁶ + 1`) is used by default — a widely adopted choice in practice for being both efficient and secure.
 
-### 2. Cifragem
+### 2. Encryption
 
 ```
 C = M^e mod n
 ```
 
-A mensagem `M` (representada como inteiro) é elevada ao expoente público `e` módulo `n`, produzindo o criptograma `C`.
+The message `M` (represented as an integer) is raised to the public exponent `e` modulo `n`, producing the ciphertext `C`.
 
-### 3. Decifragem
+### 3. Decryption
 
 ```
 M = C^d mod n
 ```
 
-O criptograma `C` é elevado ao expoente privado `d` módulo `n`, recuperando a mensagem original `M`.
+The ciphertext `C` is raised to the private exponent `d` modulo `n`, recovering the original message `M`.
 
-### 4. Por que funciona?
+### 4. Why Does It Work?
 
-Pelo **Teorema de Euler**, temos que:
+By **Euler's Theorem**, we have:
 
 ```
-M^(φ(n)) ≡ 1 (mod n),  para mdc(M, n) = 1
+M^(φ(n)) ≡ 1 (mod n),  for gcd(M, n) = 1
 ```
 
-Como `d` é o inverso de `e` módulo `φ(n)`, temos `e × d ≡ 1 (mod φ(n))`, e portanto:
+Since `d` is the modular inverse of `e` modulo `φ(n)`, we have `e × d ≡ 1 (mod φ(n))`, and therefore:
 
 ```
 C^d = (M^e)^d = M^(e×d) ≡ M (mod n)
@@ -78,141 +78,141 @@ C^d = (M^e)^d = M^(e×d) ≡ M (mod n)
 
 ---
 
-## Estrutura do Código
+## Code Structure
 
 ```
 criptoAssim.py
-├── 1. Aritmética Modular e Primalidade
-│   ├── is_prime_miller_rabin()   — Teste de Miller-Rabin (probabilístico)
-│   ├── mod_pow()                 — Exponenciação modular rápida (Square-and-Multiply)
-│   ├── gcd()                     — Máximo Divisor Comum (Algoritmo de Euclides)
-│   ├── extended_gcd()            — Euclides Estendido: retorna g, x, y tal que ax + by = g
-│   └── mod_inverse()             — Inverso multiplicativo modular
+├── 1. Modular Arithmetic and Primality
+│   ├── is_prime_miller_rabin()   — Miller-Rabin primality test (probabilistic)
+│   ├── mod_pow()                 — Fast modular exponentiation (Square-and-Multiply)
+│   ├── gcd()                     — Greatest Common Divisor (Euclidean Algorithm)
+│   ├── extended_gcd()            — Extended Euclidean: returns g, x, y such that ax + by = g
+│   └── mod_inverse()             — Modular multiplicative inverse
 │
-├── 2. Geração de Primos Grandes
-│   └── generate_prime()          — Gera primo aleatório de N bits
+├── 2. Large Prime Generation
+│   └── generate_prime()          — Generates a random N-bit prime
 │
-├── 3. Geração do Par de Chaves
-│   └── generate_keys()           — Retorna (chave_pública, chave_privada, p, q, φ(n))
+├── 3. Key Pair Generation
+│   └── generate_keys()           — Returns (public_key, private_key, p, q, φ(n))
 │
-├── 4. Cifragem e Decifragem
-│   ├── text_to_int() / int_to_text()  — Conversão entre texto UTF-8 e inteiro
-│   ├── encrypt()                       — Cifra mensagem em blocos: C = M^e mod n
-│   └── decrypt()                       — Decifra blocos: M = C^d mod n
+├── 4. Encryption and Decryption
+│   ├── text_to_int() / int_to_text()  — Conversion between UTF-8 text and integer
+│   ├── encrypt()                       — Encrypts message in blocks: C = M^e mod n
+│   └── decrypt()                       — Decrypts blocks: M = C^d mod n
 │
 └── 5. Interface
-    ├── demo_mode()               — Demonstração automática completa
-    └── interactive_mode()        — Menu interativo (cifrar, decifrar, gerar chaves)
+    ├── demo_mode()               — Full automatic demonstration
+    └── interactive_mode()        — Interactive menu (encrypt, decrypt, generate keys)
 ```
 
-### Algoritmos Implementados
+### Implemented Algorithms
 
-**Miller-Rabin** — Teste probabilístico de primalidade com `k = 20` rodadas. A probabilidade de um composto passar no teste é no máximo `4⁻²⁰ ≈ 10⁻¹²`.
+**Miller-Rabin** — Probabilistic primality test with `k = 20` rounds. The probability of a composite number passing the test is at most `4⁻²⁰ ≈ 10⁻¹²`.
 
-**Square-and-Multiply** — Exponenciação modular em `O(log exp)` operações, essencial para tornar `M^e mod n` viável com expoentes e módulos de centenas de bits.
+**Square-and-Multiply** — Modular exponentiation in `O(log exp)` operations, essential for making `M^e mod n` feasible with exponents and moduli of hundreds of bits.
 
-**Algoritmo de Euclides Estendido** — Calcula o inverso modular de `e` em `φ(n)`, obtendo o expoente de decifragem `d`.
+**Extended Euclidean Algorithm** — Computes the modular inverse of `e` in `φ(n)`, obtaining the decryption exponent `d`.
 
-**Blocos de mensagem** — A mensagem é dividida em blocos de `(bits_n / 8) - 1` bytes para garantir que cada bloco `M < n`, requisito obrigatório da aritmética RSA.
+**Message blocks** — The message is split into blocks of `(bits_n / 8) - 1` bytes to ensure each block `M < n`, a mandatory requirement of RSA arithmetic.
 
 ---
 
-## Como Usar
+## How to Use
 
-### Requisitos
+### Requirements
 
-- Python 3.10 ou superior (sem dependências externas)
+- Python 3.10 or higher (no external dependencies)
 
-### Modo Demonstração
+### Demo Mode
 
-Executa automaticamente a geração de chaves, cifragem e decifragem:
+Automatically runs key generation, encryption, and decryption:
 
 ```bash
 python criptoAssim.py --demo
 ```
 
-### Modo Interativo
+### Interactive Mode
 
-Abre um menu com opções de geração de chaves, cifragem e decifragem manual:
+Opens a menu with options for key generation, encryption, and manual decryption:
 
 ```bash
 python criptoAssim.py
 ```
 
-#### Opções do menu:
+#### Menu options:
 
 ```
-1. Gerar par de chaves      — escolha o tamanho em bits (512, 1024...)
-2. Cifrar mensagem          — usa a chave pública gerada
-3. Decifrar mensagem        — usa a chave privada gerada
-4. Demonstração completa    — executa o fluxo completo automaticamente
-5. Sair
+1. Generate key pair      — choose the key size in bits (512, 1024...)
+2. Encrypt message        — uses the generated public key
+3. Decrypt message        — uses the generated private key
+4. Full demonstration     — runs the complete flow automatically
+5. Exit
 ```
 
 ---
 
-## Exemplo de Saída
+## Sample Output
 
 ```
-▶ Gerando par de chaves RSA (512 bits)...
-  Gerando primo p (256 bits)... ✓
-  Gerando primo q (256 bits)... ✓
-  Calculando expoente de decifragem d... ✓
+▶ Generating RSA key pair (512 bits)...
+  Generating prime p (256 bits)... ✓
+  Generating prime q (256 bits)... ✓
+  Computing decryption exponent d... ✓
 
-━━━━━━━━━━━━━━━━ CHAVES GERADAS ━━━━━━━━━━━━━━━━
-  🔑 Chave Pública  (e, n):
+━━━━━━━━━━━━━━━━ GENERATED KEYS ━━━━━━━━━━━━━━━━
+  🔑 Public Key  (e, n):
      e = 65537
-     n = 9823...4471   (número de 512 bits)
+     n = 9823...4471   (512-bit number)
 
-  🔐 Chave Privada  (d, n):
+  🔐 Private Key  (d, n):
      d = 7214...3309
      n = 9823...4471
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-▶ Mensagem original:
-   "RSA funciona! Segurança assimétrica com aritmética modular."
+▶ Original message:
+   "RSA works! Asymmetric security with modular arithmetic."
 
-▶ Cifrando com chave pública...
-   Blocos cifrados (2 bloco(s)):
+▶ Encrypting with public key...
+   Encrypted blocks (2 block(s)):
    [0] 38271...9042
    [1] 71049...2218
 
-▶ Decifrando com chave privada...
-   Mensagem recuperada:
-   "RSA funciona! Segurança assimétrica com aritmética modular."
+▶ Decrypting with private key...
+   Recovered message:
+   "RSA works! Asymmetric security with modular arithmetic."
 
-▶ Verificação:
-   Mensagem original == Mensagem decifrada? ✅ SIM
+▶ Verification:
+   Original message == Decrypted message? ✅ YES
 ```
 
 ---
 
-## Limitações e Segurança
+## Limitations and Security
 
-> ⚠️ Este projeto tem **fins educacionais**. Não deve ser usado em sistemas de produção.
+> ⚠️ This project is intended for **educational purposes only**. It should not be used in production systems.
 
-- **Tamanho de chave**: 512 bits é insuficiente para uso real. O padrão atual recomenda **mínimo de 2048 bits**, com 4096 bits para alta segurança.
-- **Sem padding**: A implementação não utiliza esquemas de padding como OAEP (PKCS#1 v2), tornando-a vulnerável a ataques de texto cifrado escolhido.
-- **Gerenciamento de chaves**: As chaves são geradas e exibidas em memória, sem armazenamento seguro.
-- **Side-channel**: Não há proteção contra ataques de temporização (*timing attacks*).
+- **Key size**: 512 bits is insufficient for real-world use. The current standard recommends a **minimum of 2048 bits**, with 4096 bits for high security.
+- **No padding**: The implementation does not use padding schemes such as OAEP (PKCS#1 v2), making it vulnerable to chosen-ciphertext attacks.
+- **Key management**: Keys are generated and displayed in memory, with no secure storage.
+- **Side-channel**: There is no protection against timing attacks.
 
-Para uso em produção, utilize bibliotecas auditadas como `cryptography` (Python) ou `OpenSSL`.
+For production use, rely on audited libraries such as `cryptography` (Python) or `OpenSSL`.
 
 ---
 
-## Requisitos
+## Requirements
 
-| Item | Versão |
-|------|--------|
+| Item | Version |
+|------|---------|
 | Python | ≥ 3.10 |
-| Bibliotecas externas | Nenhuma |
+| External libraries | None |
 
-Apenas a biblioteca padrão do Python é utilizada (`random`, `math`, `sys`).
+Only the Python standard library is used (`random`, `math`, `sys`).
 
 ---
 
-## Referências
+## References
 
 - Rivest, R. L., Shamir, A., & Adleman, L. (1978). *A method for obtaining digital signatures and public-key cryptosystems*. Communications of the ACM.
-- Cormen, T. H. et al. *Introduction to Algorithms* — Capítulos sobre teoria dos números e criptografia.
-- NIST FIPS 186-5 — Padrões para geração de chaves criptográficas.
+- Cormen, T. H. et al. *Introduction to Algorithms* — Chapters on number theory and cryptography.
+- NIST FIPS 186-5 — Standards for cryptographic key generation.
